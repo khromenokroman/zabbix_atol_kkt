@@ -5,7 +5,7 @@ import codecs
 import datetime
 
 PATH = r'C:\\ATOL\\ATOL_INFO_KKT'
-COMMANDS = ['fn_end','fn_ofd_status'] #список всех команд
+COMMANDS = ['reboot', 'fn_end','fn_ofd_status'] #список всех команд
 
 def get_delta_day(date_fn):# узнаем сколько дней до окнчания срока действия фн
     
@@ -128,16 +128,27 @@ def get_indo_kkt(command):
             return get_delta_day(dateTimeFnEnd)
         elif command == 'fn_ofd_status':
             return get_status_ofd(dateTimeOfd)
+        elif command == 'reboot':
+            with open(f'{PATH}\\fn_end', 'w', encoding='utf-8') as file_fn_end:
+                file_fn_end.write(str(get_delta_day(dateTimeFnEnd)))
+            with open(f'{PATH}\\fn_ofd_status', 'w', encoding='utf-8') as fn_ofd_status:
+                fn_ofd_status.write(str(get_status_ofd(dateTimeOfd)))
+            return 'OK!'
     else:
-        return 'device is not connected...'
+        try:
+            if command == 'fn_end':
+                with open(f'{PATH}\\fn_end', 'r', encoding='utf-8') as file_fn_end:
+                    return file_fn_end.readlines()[0]
+            elif command == 'fn_ofd_status':
+                with open(f'{PATH}\\fn_ofd_status', 'r', encoding='utf-8') as fn_ofd_status:
+                    return fn_ofd_status.readlines()[0]
+        except:
+            with open(f'{PATH}\\error', 'w', encoding='utf-8') as file_error:
+                    return file_error.write(str(datetime.datetime.now()))
+            return 'device is not connected...'
 
 if __name__ == '__main__':
 
-    # for item in COMMANDS:
-    #     if item == sys.argv[1]:
-    #         print(get_indo_kkt(sys.argv[1]))
-    #     else:
-    #         print('incomprehensible command')
     if sys.argv[1] not in COMMANDS:
         print('incomprehensible command')
     else:
